@@ -1,6 +1,10 @@
-//================================================
-// YOUR NAME GOES HERE <-----------------  
-//================================================
+//====================================================================
+// Joshua Murray
+// Due Friday, March 29
+// Programming II: Assigment #6
+// Description: Program that can draw on a canvas and switch between two shapes and 3 colors
+// the drawing is also kept for next use, as well as the setting last used
+//====================================================================
 #include <iostream>
 #include <fstream>
 using namespace std;
@@ -11,9 +15,6 @@ using namespace std;
 #include "DrawingUI.h"
 using namespace sf;
 
-// Finish this code. Other than where it has comments telling you to 
-// add code, you shouldn't need to add any logic to main to satisfy
-// the requirements of this programming assignment
 
 int main()
 {
@@ -23,12 +24,20 @@ int main()
 	RenderWindow window(VideoMode(WINDOW_WIDTH, WINDOW_HEIGHT), "Drawing");
 	window.setFramerateLimit(60);
 
-	SettingsMgr settingsMgr(Color::Blue, ShapeEnum::CIRCLE);
+	SettingsMgr settingsMgr(Color::Cyan, ShapeEnum::CIRCLE);
 	SettingsUI  settingsUI(&settingsMgr); 
 	ShapeMgr    shapeMgr;
 	DrawingUI   drawingUI(Vector2f(200, 50));
 	
-	// ********* Add code here to make the managers read from shapes file (if the file exists)
+	// read data from the file
+	fstream file;
+	file.open("shapes.bin", ios::binary | ios::in);
+	if (file)
+	{
+		settingsMgr.readFile(file);
+		shapeMgr.readFile(file);
+		file.close(); // close the file once finished reading  
+	}
 
 	while (window.isOpen()) 
 	{
@@ -38,12 +47,18 @@ int main()
 			if (event.type == Event::Closed)
 			{
 				window.close();
+				fstream file;
+				file.open("shapes.bin", ios::binary | ios::out);
+				settingsMgr.writeFile(file);
+				shapeMgr.writeFile(file);
+				file.close();
+
 				// ****** Add code here to write all data to shapes file
 			}
 			else if (event.type == Event::MouseButtonReleased)
 			{
-				// maybe they just clicked on one of the settings "buttons"
-				// check for this and handle it.
+				// if mouse button is released, it may be above a setting
+				// if above setting, change the setting
 				Vector2f mousePos = window.mapPixelToCoords(Mouse::getPosition(window));
 				settingsUI.handleMouseUp(mousePos);
 			}
@@ -73,6 +88,7 @@ int main()
 
 		window.display();
 	} // end body of animation loop
+
 
 	return 0;
 }
